@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Balnian/DNSbin/dnslogger"
-	"github.com/teris-io/shortid"
+	"github.com/matoous/go-nanoid"
 )
 
 const (
@@ -19,6 +19,10 @@ const (
 	DefaultListenPort = ":8080"
 	//EntryLifeDuration is the value that determine how long the server will keep an entry
 	EntryLifeDuration = 4 * time.Hour
+	//UIDAlphabet contains the char to generate the uid
+	UIDAlphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	//UIDSize is the size of the generated uid
+	UIDSize = 10
 )
 
 type dataEntry struct {
@@ -49,9 +53,6 @@ func main() {
 	//Cleaner to periodicaly remove expire data store
 	fmt.Println("Starting Cleaner")
 	go cleaner()
-
-	//Set shortid to generate valid id that we can use in domain name DefaultABC contains([A-Za-z0-9\-_]) and we remove "-_"
-	shortid.SetDefault(shortid.MustNew(0, strings.Trim(shortid.DefaultABC, "-_"), 1))
 
 	ListenPort := DefaultListenPort
 	//Start webserver
@@ -134,7 +135,7 @@ func handleRequest(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleNew(w http.ResponseWriter, req *http.Request) {
-	id, _ := shortid.Generate()
+	id, _ := gonanoid.Generate(UIDAlphabet, UIDSize)
 	datastore[id] = dataEntry{nil, time.Now()}
 	http.Redirect(w, req, "/"+id+"?view=html", 303)
 
